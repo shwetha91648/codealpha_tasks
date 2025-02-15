@@ -1,0 +1,52 @@
+import requests
+
+class StockPortfolio:
+    def __init__(self):
+        self.portfolio = {}
+
+    def add_stock(self, symbol, shares, price):
+        """Adds a stock to the portfolio."""
+        if symbol in self.portfolio:
+            self.portfolio[symbol]['shares'] += shares
+        else:
+            self.portfolio[symbol] = {'shares': shares, 'price': price}
+        print(f"Added {shares} shares of {symbol} at ${price} per share.")
+
+    def remove_stock(self, symbol, shares):
+        """Removes shares of a stock from the portfolio."""
+        if symbol in self.portfolio:
+            if shares >= self.portfolio[symbol]['shares']:
+                del self.portfolio[symbol]
+                print(f"Removed all shares of {symbol}.")
+            else:
+                self.portfolio[symbol]['shares'] -= shares
+                print(f"Removed {shares} shares of {symbol}.")
+        else:
+            print("Stock not found in portfolio.")
+
+    def get_stock_price(self, symbol):
+        """Fetches the real-time stock price using a financial API."""
+        api_url = f"https://api.example.com/stock/{symbol}/price"  # Replace with a real API
+        response = requests.get(api_url)
+        if response.status_code == 200:
+            return response.json()['price']
+        else:
+            print("Failed to fetch stock price.")
+            return None
+
+    def portfolio_value(self):
+        """Calculates the total portfolio value."""
+        total_value = 0
+        for symbol, data in self.portfolio.items():
+            current_price = self.get_stock_price(symbol)
+            if current_price:
+                total_value += data['shares'] * current_price
+        print(f"Total portfolio value: ${total_value:.2f}")
+        return total_value
+
+if __name__ == "__main__":
+    tracker = StockPortfolio()
+    tracker.add_stock("AAPL", 10, 150)
+    tracker.add_stock("GOOGL", 5, 2800)
+    tracker.remove_stock("AAPL", 5)
+    tracker.portfolio_value()
